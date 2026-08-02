@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-const TARGET_DATE = new Date("2026-09-02T00:00:00");
+const TARGET_DATE = new Date("2026-09-02T08:30:00");
 
 type TimeLeft = {
   days: number;
@@ -72,11 +72,13 @@ export function Countdown() {
 
   const formattedTarget = useMemo(
     () =>
-      TARGET_DATE.toLocaleDateString("en-US", {
+      TARGET_DATE.toLocaleString("en-US", {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
       }),
     []
   );
@@ -97,7 +99,7 @@ export function Countdown() {
           Countdown to September
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground max-w-md">
-          Every second counting down to September 2nd.
+          Every second counting down to September 2nd at 8:30 AM.
         </p>
       </div>
 
