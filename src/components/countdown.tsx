@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-const TARGET_DATE = new Date("2026-09-02T08:30:00");
+// 8:30 AM on 2 September 2026, UK time (BST, UTC+1 in early September).
+const TARGET_DATE = new Date("2026-09-02T07:30:00Z");
 
 type TimeLeft = {
   days: number;
@@ -88,18 +89,24 @@ export function Countdown() {
     return () => clearInterval(interval);
   }, []);
 
-  const formattedTarget = useMemo(
-    () =>
-      TARGET_DATE.toLocaleString("en-US", {
+  const formattedTarget = useMemo(() => {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-GB", {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-      }),
-    []
-  );
+        hour12: false,
+        timeZone: "Europe/London",
+      })
+        .formatToParts(TARGET_DATE)
+        .map((part) => [part.type, part.value])
+    );
+
+    return `${parts.weekday} ${parts.day} ${parts.month} ${parts.year} at ${parts.hour}:${parts.minute} (UK time)`;
+  }, []);
 
   return (
     <>
@@ -138,7 +145,8 @@ export function Countdown() {
             The Last Days of Summer
           </h1>
           <p className="max-w-md text-sm text-amber-900/70 sm:text-base">
-            Every second counting down until summer holiday ends.
+            Every second counting down until it&apos;s time to be back in
+            school.
           </p>
         </div>
 
@@ -150,7 +158,7 @@ export function Countdown() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-2xl font-semibold text-amber-800"
           >
-            🍂 Summer&apos;s over — welcome back!
+            🎒 Time to be in school!
           </motion.p>
         ) : (
           <div className="flex items-center justify-center gap-2 sm:gap-4">
