@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Countdown to September",
-  description: "A live countdown to September 2nd.",
+  title: "End of Summer Countdown",
+  description: "Counting down the last days of summer holiday.",
 };
 
 export default function RootLayout({
@@ -25,9 +25,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      style={{ colorScheme: "light" }}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-gradient-to-b from-sky-100 via-amber-50 to-orange-100 text-foreground">
+        {children}
+      </body>
     </html>
   );
 }
