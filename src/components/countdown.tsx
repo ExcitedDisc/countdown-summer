@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Palmtree, Sun, Waves } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-// 8:30 AM on 2 September 2026, UK time (BST, UTC+1 in early September).
-const TARGET_DATE = new Date("2026-09-02T07:30:00Z");
+import { HolidaySelector } from "@/components/holiday-selector";
+import { getAutoHoliday, getHolidayById, type Holiday } from "@/lib/holidays";
+import { THEME_CONFIG } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+import { useStoredHolidayId } from "@/lib/use-stored-holiday";
 
 type TimeLeft = {
   days: number;
@@ -34,13 +35,49 @@ function getTimeLeft(target: Date): TimeLeft {
   };
 }
 
-function TimeUnit({ value, label }: { value: number; label: string }) {
+function formatUkDateTime(date: Date) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Europe/London",
+    })
+      .formatToParts(date)
+      .map((part) => [part.type, part.value])
+  );
+
+  return `${parts.weekday} ${parts.day} ${parts.month} ${parts.year} at ${parts.hour}:${parts.minute} (UK time)`;
+}
+
+function TimeUnit({
+  value,
+  label,
+  cardClassName,
+  digitGradient,
+  labelClassName,
+}: {
+  value: number;
+  label: string;
+  cardClassName: string;
+  digitGradient: string;
+  labelClassName: string;
+}) {
   const padded = value.toString().padStart(2, "0");
 
   return (
-    <Card className="w-20 sm:w-28 border-amber-200/70 bg-white/70 shadow-lg shadow-amber-900/5 backdrop-blur-sm py-0">
-      <CardContent className="flex flex-col items-center justify-center gap-1 px-2 py-4 sm:py-6">
-        <div className="relative h-10 sm:h-14 w-full overflow-hidden text-center">
+    <Card
+      className={cn(
+        "w-16 sm:w-24 border shadow-lg backdrop-blur-sm py-0",
+        cardClassName
+      )}
+    >
+      <CardContent className="flex flex-col items-center justify-center gap-1 px-2 py-3 sm:py-5">
+        <div className="relative h-8 sm:h-12 w-full overflow-hidden text-center">
           <AnimatePresence mode="popLayout">
             <motion.span
               key={padded}
@@ -48,13 +85,16 @@ function TimeUnit({ value, label }: { value: number; label: string }) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -24, opacity: 0 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="absolute inset-0 flex items-center justify-center font-mono text-3xl sm:text-5xl font-semibold tabular-nums bg-gradient-to-b from-orange-600 to-amber-500 bg-clip-text text-transparent"
+              className={cn(
+                "absolute inset-0 flex items-center justify-center font-mono text-2xl sm:text-4xl font-semibold tabular-nums bg-gradient-to-b bg-clip-text text-transparent",
+                digitGradient
+              )}
             >
               {padded}
             </motion.span>
           </AnimatePresence>
         </div>
-        <span className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-900/60">
+        <span className={cn("text-[9px] sm:text-[11px] uppercase tracking-widest", labelClassName)}>
           {label}
         </span>
       </CardContent>
@@ -62,13 +102,7 @@ function TimeUnit({ value, label }: { value: number; label: string }) {
   );
 }
 
-function FloatingBlob({
-  className,
-  duration,
-}: {
-  className: string;
-  duration: number;
-}) {
+function FloatingBlob({ className, duration }: { className: string; duration: number }) {
   return (
     <motion.div
       aria-hidden
@@ -79,102 +113,141 @@ function FloatingBlob({
   );
 }
 
-export function Countdown() {
+function CountdownRow({
+  title,
+  target,
+  reachedLabel,
+  theme,
+}: {
+  title: string;
+  target: Date;
+  reachedLabel: string;
+  theme: (typeof THEME_CONFIG)[keyof typeof THEME_CONFIG];
+}) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(TARGET_DATE));
-    }, 1000);
+    const interval = setInterval(() => setTimeLeft(getTimeLeft(target)), 1000);
     return () => clearInterval(interval);
-  }, []);
-
-  const formattedTarget = useMemo(() => {
-    const parts = Object.fromEntries(
-      new Intl.DateTimeFormat("en-GB", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "Europe/London",
-      })
-        .formatToParts(TARGET_DATE)
-        .map((part) => [part.type, part.value])
-    );
-
-    return `${parts.weekday} ${parts.day} ${parts.month} ${parts.year} at ${parts.hour}:${parts.minute} (UK time)`;
-  }, []);
+  }, [target]);
 
   return (
-    <>
-      <FloatingBlob
-        className="-top-24 -left-24 h-72 w-72 bg-amber-300/40"
-        duration={10}
-      />
-      <FloatingBlob
-        className="-bottom-24 -right-16 h-80 w-80 bg-sky-300/40"
-        duration={12}
-      />
-      <FloatingBlob
-        className="top-1/3 right-1/4 h-56 w-56 bg-orange-300/30"
-        duration={14}
-      />
+    <div className="flex flex-col items-center gap-3">
+      <Badge className={cn("px-3 py-1 text-[10px] tracking-wide sm:text-xs", theme.badgeClassName)}>
+        {title} · {formatUkDateTime(target)}
+      </Badge>
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative flex w-full flex-col items-center gap-8"
-      >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+      {timeLeft?.isComplete ? (
+        <motion.p
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={cn("text-lg font-semibold sm:text-xl", theme.labelClassName)}
         >
-          <Sun className="size-10 text-amber-500" strokeWidth={1.5} />
-        </motion.div>
-
-        <Badge className="border-amber-200 bg-amber-100 px-3 py-1 text-xs tracking-wide text-amber-800">
-          {formattedTarget}
-        </Badge>
-
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="bg-gradient-to-r from-amber-600 via-orange-500 to-pink-500 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-5xl">
-            The Last Days of Summer
-          </h1>
-          <p className="max-w-md text-sm text-amber-900/70 sm:text-base">
-            Every second counting down until it&apos;s time to be back in
-            school.
-          </p>
+          {reachedLabel}
+        </motion.p>
+      ) : (
+        <div className="flex items-center justify-center gap-1.5 sm:gap-3">
+          <TimeUnit
+            value={timeLeft?.days ?? 0}
+            label="Days"
+            cardClassName={theme.cardClassName}
+            digitGradient={theme.digitGradient}
+            labelClassName={theme.labelClassName}
+          />
+          <TimeUnit
+            value={timeLeft?.hours ?? 0}
+            label="Hours"
+            cardClassName={theme.cardClassName}
+            digitGradient={theme.digitGradient}
+            labelClassName={theme.labelClassName}
+          />
+          <TimeUnit
+            value={timeLeft?.minutes ?? 0}
+            label="Minutes"
+            cardClassName={theme.cardClassName}
+            digitGradient={theme.digitGradient}
+            labelClassName={theme.labelClassName}
+          />
+          <TimeUnit
+            value={timeLeft?.seconds ?? 0}
+            label="Seconds"
+            cardClassName={theme.cardClassName}
+            digitGradient={theme.digitGradient}
+            labelClassName={theme.labelClassName}
+          />
         </div>
+      )}
+    </div>
+  );
+}
 
-        <Separator className="w-24 bg-amber-200" />
+export function Countdown() {
+  const [storedId, setStoredId] = useStoredHolidayId();
 
-        {timeLeft?.isComplete ? (
-          <motion.p
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-2xl font-semibold text-amber-800"
-          >
-            🎒 Time to be in school!
-          </motion.p>
-        ) : (
-          <div className="flex items-center justify-center gap-2 sm:gap-4">
-            <TimeUnit value={timeLeft?.days ?? 0} label="Days" />
-            <TimeUnit value={timeLeft?.hours ?? 0} label="Hours" />
-            <TimeUnit value={timeLeft?.minutes ?? 0} label="Minutes" />
-            <TimeUnit value={timeLeft?.seconds ?? 0} label="Seconds" />
+  const holiday: Holiday = useMemo(
+    () => (storedId ? getHolidayById(storedId) ?? getAutoHoliday() : getAutoHoliday()),
+    [storedId]
+  );
+  const theme = THEME_CONFIG[holiday.theme];
+  const [IconA, IconB, IconC] = theme.icons;
+
+  return (
+    <div className={cn("relative flex min-h-screen w-full flex-col overflow-hidden", theme.pageBackground)}>
+      <title>{theme.pageTitle}</title>
+      <HolidaySelector selected={holiday} onSelect={setStoredId} dark={theme.dark} />
+
+      <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-24">
+        <FloatingBlob className={cn("-top-24 -left-24 h-72 w-72", theme.iconClassName, "opacity-40")} duration={10} />
+        <FloatingBlob className={cn("-bottom-24 -right-16 h-80 w-80", theme.iconClassName, "opacity-30")} duration={12} />
+        <FloatingBlob className={cn("top-1/3 right-1/4 h-56 w-56", theme.iconClassName, "opacity-25")} duration={14} />
+
+        <motion.div
+          key={holiday.id}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="relative flex w-full flex-col items-center gap-8"
+        >
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }}>
+            <IconA className={cn("size-10", theme.iconClassName)} strokeWidth={1.5} />
+          </motion.div>
+
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1
+              className={cn(
+                "bg-gradient-to-r bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-5xl",
+                theme.headingGradient
+              )}
+            >
+              {theme.heading}
+            </h1>
+            <p className={cn("max-w-md text-sm sm:text-base", theme.labelClassName)}>{theme.description}</p>
           </div>
-        )}
 
-        <div className="flex items-center gap-6 text-amber-500/70">
-          <Sun className="size-5" strokeWidth={1.5} />
-          <Waves className="size-5" strokeWidth={1.5} />
-          <Palmtree className="size-5" strokeWidth={1.5} />
-        </div>
-      </motion.div>
-    </>
+          <Separator className={cn("w-24", theme.separatorClassName)} />
+
+          <div className="flex flex-col items-center gap-10 sm:flex-row sm:gap-14">
+            <CountdownRow
+              title="Starts in"
+              target={holiday.startsAt}
+              reachedLabel={`🎉 ${holiday.label} has started!`}
+              theme={theme}
+            />
+            <CountdownRow
+              title="Back to school"
+              target={holiday.endsAt}
+              reachedLabel={theme.completeMessage}
+              theme={theme}
+            />
+          </div>
+
+          <div className={cn("flex items-center gap-6", theme.iconClassName)}>
+            <IconA className="size-5" strokeWidth={1.5} />
+            <IconB className="size-5" strokeWidth={1.5} />
+            <IconC className="size-5" strokeWidth={1.5} />
+          </div>
+        </motion.div>
+      </main>
+    </div>
   );
 }
