@@ -215,7 +215,7 @@ export function Countdown() {
           <div className="flex flex-col items-center gap-2 text-center">
             <h1
               className={cn(
-                "bg-gradient-to-r bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-5xl",
+                "font-heading bg-gradient-to-r bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-6xl",
                 theme.headingGradient
               )}
             >

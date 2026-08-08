@@ -4,7 +4,8 @@ export type HolidayTheme =
   | "christmas"
   | "valentine"
   | "easter"
-  | "maytime";
+  | "maytime"
+  | "bank-holiday";
 
 export type Holiday = {
   id: string;
@@ -72,7 +73,7 @@ export const HOLIDAYS: Holiday[] = [
     label: "Summer Holiday 2026",
     shortLabel: "Summer '26",
     theme: "summer",
-    tagline: "Six weeks of sunshine before term starts",
+    tagline: "Six weeks of sunshine, including the August bank holiday",
     startsAt: midnightUK(2026, 7, 22),
     endsAt: eightThirtyUK(2026, 9, 2),
   },
@@ -90,7 +91,7 @@ export const HOLIDAYS: Holiday[] = [
     label: "Christmas Holiday",
     shortLabel: "Christmas",
     theme: "christmas",
-    tagline: "The big winter break",
+    tagline: "The big winter break, with Christmas Day, Boxing Day and New Year's Day",
     startsAt: midnightUK(2026, 12, 19),
     endsAt: eightThirtyUK(2027, 1, 5),
   },
@@ -108,16 +109,26 @@ export const HOLIDAYS: Holiday[] = [
     label: "Easter Holiday",
     shortLabel: "Easter",
     theme: "easter",
-    tagline: "Spring break and egg hunts",
-    startsAt: midnightUK(2027, 3, 27),
+    // Starts on Good Friday, which is always a bank holiday.
+    tagline: "Spring break, egg hunts, Good Friday and Easter Monday",
+    startsAt: midnightUK(2027, 3, 26),
     endsAt: eightThirtyUK(2027, 4, 12),
+  },
+  {
+    id: "may-day-bank-holiday",
+    label: "Early May Bank Holiday",
+    shortLabel: "May Day",
+    theme: "bank-holiday",
+    tagline: "One extra long weekend in term time",
+    startsAt: midnightUK(2027, 5, 3),
+    endsAt: eightThirtyUK(2027, 5, 4),
   },
   {
     id: "may-half-term",
     label: "May Half Term",
     shortLabel: "May Half Term",
     theme: "maytime",
-    tagline: "Blossom and a bank holiday week",
+    tagline: "Blossom and the Spring bank holiday week",
     startsAt: midnightUK(2027, 5, 29),
     endsAt: eightThirtyUK(2027, 6, 7),
   },
