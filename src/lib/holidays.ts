@@ -2,7 +2,7 @@ export type HolidayTheme =
   | "summer"
   | "halloween"
   | "christmas"
-  | "winter"
+  | "valentine"
   | "easter"
   | "maytime";
 
@@ -69,8 +69,8 @@ const eightThirtyUK = (year: number, month: number, day: number) =>
 export const HOLIDAYS: Holiday[] = [
   {
     id: "summer-2026",
-    label: "Summer Holiday",
-    shortLabel: "Summer",
+    label: "Summer Holiday 2026",
+    shortLabel: "Summer '26",
     theme: "summer",
     tagline: "Six weeks of sunshine before term starts",
     startsAt: midnightUK(2026, 7, 22),
@@ -98,8 +98,8 @@ export const HOLIDAYS: Holiday[] = [
     id: "february-half-term",
     label: "February Half Term",
     shortLabel: "Feb Half Term",
-    theme: "winter",
-    tagline: "A frosty week off",
+    theme: "valentine",
+    tagline: "A loved-up week off school",
     startsAt: midnightUK(2027, 2, 13),
     endsAt: eightThirtyUK(2027, 2, 22),
   },
@@ -120,6 +120,18 @@ export const HOLIDAYS: Holiday[] = [
     tagline: "Blossom and a bank holiday week",
     startsAt: midnightUK(2027, 5, 29),
     endsAt: eightThirtyUK(2027, 6, 7),
+  },
+  {
+    id: "summer-2027",
+    label: "Summer Holiday 2027",
+    shortLabel: "Summer '27",
+    theme: "summer",
+    // Not shown in the provided calendar image (it only ran to July '27) —
+    // estimated from the usual pattern; confirm against the 2027-28 calendar
+    // once it's published.
+    tagline: "Six weeks of sunshine before the next school year",
+    startsAt: midnightUK(2027, 7, 21),
+    endsAt: eightThirtyUK(2027, 9, 1),
   },
 ];
 
