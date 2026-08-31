@@ -75,7 +75,7 @@ export const HOLIDAYS: Holiday[] = [
     theme: "summer",
     tagline: "Six weeks of sunshine, including the August bank holiday",
     startsAt: midnightUK(2026, 7, 22),
-    endsAt: eightThirtyUK(2026, 9, 2),
+    endsAt: eightThirtyUK(2026, 9, 3),
   },
   {
     id: "october-half-term",
